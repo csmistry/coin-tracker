@@ -12,8 +12,9 @@ import (
 // ListAddresses returns a list of address added to the wallet
 func ListAddresses(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	// Call List addresss
-	json.NewEncoder(w).Encode(wallet.BitcoinWallet.Addresses)
+
+	addrs := wallet.BitcoinWallet.ListAddresses()
+	json.NewEncoder(w).Encode(addrs)
 }
 
 // GetAddress returns address information for a specific address
