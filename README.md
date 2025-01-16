@@ -1,15 +1,12 @@
 # coin-tracker
 
 
-## Build backend
+## Run application
 
-Make sure you are in the root directory
+Use the following command to start the application
 
-1. build backend image
 ```
-docker build -t go-web-app .
+docker-compose up --build
 ```
-2. Run the docker container on port `:8080`
-```
-docker run -p 8080:8080 go-web-app
-```
+
+By default this will start the backend on localhost port `:8080` and the frontend on port `:3000`
