@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/csmistry/coin-tracker/backend/pkg/wallet"
@@ -61,7 +60,6 @@ func AddAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	fmt.Println(w, "Address added with ID: %d", id)
 }
 
 // RemoveAddress archives an address from the wallet
