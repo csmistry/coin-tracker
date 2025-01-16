@@ -1,14 +1,20 @@
 package wallet
 
+import (
+	"fmt"
+
+	"github.com/csmistry/coin-tracker/backend/pkg/blockchain"
+)
+
 // Wallet represents a crypto that holds addresses and their txs
 type Wallet struct {
-	addresses []*Address
+	addresses map[string]*Address
 }
 
 // Transaction for a given address
 type Transaction struct {
 	Id        string `json:"hash"`
-	Time      int64  `json:"time"`
+	Time      string `json:"time"`
 	AddressID string `json:"address"`
 }
 
@@ -17,12 +23,12 @@ type Address struct {
 	Id           string         `json:"id"`
 	Balance      float64        `json:"balance"`
 	Transactions []*Transaction `json:"transactions"`
-	IsArchived   bool
+	IsArchived   bool           `json:"is_archived"`
 }
 
 func NewWallet() *Wallet {
 	return &Wallet{
-		addresses: []*Address{},
+		addresses: map[string]*Address{},
 	}
 }
 
@@ -37,7 +43,7 @@ func Init() {
 // WallerInterface defines actions on a wallet
 type WalletInterface interface {
 	ListAddresses() []string
-	GetAddress(id string) *Address
+	GetAddress(id string) (*Address, error)
 	AddAddress(id string) *Address
 	RemoveAddress(id string)
 }
@@ -45,9 +51,9 @@ type WalletInterface interface {
 // ListAddresses returns a list of address IDs
 func (w *Wallet) ListAddresses() []string {
 	res := []string{}
-	for _, addr := range w.addresses {
+	for addrId, addr := range w.addresses {
 		if !addr.IsArchived {
-			res = append(res, addr.Id)
+			res = append(res, addrId)
 		}
 	}
 
@@ -56,39 +62,36 @@ func (w *Wallet) ListAddresses() []string {
 
 // GetAddress returns the address details for provided address ID
 func (w *Wallet) GetAddress(id string) *Address {
-	// use Blockchain API to get address details
-	return nil
+	return w.addresses[id]
 }
 
 // AddAddress adds a valid btc address to in-memory wallet
 func (w *Wallet) AddAddress(id string) error {
-	//Validate with Blockchain API if address is valid
-
-	newAddr := &Address{
-		Id:           id,
-		Transactions: []*Transaction{},
+	// validate address
+	valid := blockchain.ValidateBitcoinAddress(id)
+	if !valid {
+		return fmt.Errorf("invalid btc address")
 	}
 
-	w.addresses = append(w.addresses, newAddr)
+	// fetch details from blockchain
+	resp, err := blockchain.GetBlockchainAddress(id)
+	if err != nil {
+		return fmt.Errorf("failed to address details for ID: [%s] err: %w", id, err)
+	}
+
+	// update in-memory wallet
+	w.addresses[id] = APIRespnseToAddress(resp)
+	fmt.Println("Address added with ID: ", id)
 	return nil
 }
 
 // RemoveAddress archives an address in the wallet
 func (w *Wallet) RemoveAddress(id string) {
-	for _, address := range w.addresses {
-		if address.Id == id {
+	for addrId, address := range w.addresses {
+		if addrId == id {
 			address.IsArchived = true
 			break
 		}
 	}
-}
-
-// CheckAddressExists is a helper function that checks if an address exists in the wallet
-func CheckAddressExists(id string) bool {
-	for _, address := range BitcoinWallet.addresses {
-		if address.Id == id && !address.IsArchived {
-			return true
-		}
-	}
-	return false
+	fmt.Println("Archived address: ", id)
 }
