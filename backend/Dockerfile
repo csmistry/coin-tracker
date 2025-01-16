@@ -3,7 +3,7 @@ FROM golang:1.23
 
 WORKDIR /app
 
-COPY backend/. ./
+COPY . .
 
 RUN go mod tidy
 
