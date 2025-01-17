@@ -23,7 +23,12 @@ func main() {
 	wallet.Init()
 
 	// Enable CORS
-	handler := cors.Default().Handler(router)
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	})
+	handler := c.Handler(router)
 	fmt.Println("Serving requests on port :8080")
 	http.ListenAndServe(":8080", handler)
 }
