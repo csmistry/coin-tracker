@@ -7,6 +7,7 @@ import (
 	"github.com/csmistry/coin-tracker/backend/handlers"
 	"github.com/csmistry/coin-tracker/backend/pkg/wallet"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -21,6 +22,8 @@ func main() {
 	// Create new in-memory wallet
 	wallet.Init()
 
+	// Enable CORS
+	handler := cors.Default().Handler(router)
 	fmt.Println("Serving requests on port :8080")
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(":8080", handler)
 }
